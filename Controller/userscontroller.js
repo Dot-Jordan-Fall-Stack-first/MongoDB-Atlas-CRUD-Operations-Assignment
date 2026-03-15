@@ -1,4 +1,4 @@
-
+const userModel = require("../models/userSchema")
 
 let users = [
   { id: 1, name: "Alice", email: "alice@email.com" },
@@ -7,7 +7,14 @@ let users = [
 ];
 
 
-
+const getAllUsers = (req, res) => {
+  userModel.find().then((result) => {
+    res.status(200);
+    res.json(result);
+  }).catch((err) => {
+    res.send(err);
+  });
+}
 
 
 const getUserById = (req, res) => {
@@ -30,25 +37,7 @@ const getUserById = (req, res) => {
   });
 
 };
-const createUser = (req, res) => {
 
-  const { name, email } = req.body;
-
-  const newUser = {
-    id: users.length + 1,
-    name,
-    email
-  };
-
-  users.push(newUser);
-
-  res.status(201).json({
-    message: "User created successfully",
-    data: newUser,
-    success: true
-  });
-
-};
 
 const updateUser = (req, res) => {
 
@@ -87,9 +76,41 @@ const deleteUser = (req, res) => {
 
 };
 
+const createNewUser = (req, res) => {
+  const { email, name, password, age } = req.body;
+
+  if (!email) {
+    return res.status(404).json({
+      message: "Email Not Found"
+    });
+  }
+
+  const user = new userModel({
+    email,
+    password,
+    name,
+    age
+  });
+
+  user.save()
+    .then(() => {
+      res.status(201).json({
+        message: "New user was created"
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Failed",
+        error: err
+      });
+    });
+};
+
 module.exports = {
+  getAllUsers,
   getUserById,
-  createUser,
+ 
   updateUser,
-  deleteUser
+  deleteUser,
+  createNewUser
 };
